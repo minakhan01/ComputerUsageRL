@@ -1,10 +1,14 @@
 import time
+import cpc
+import data_process
+import haiku as kh
+import optax
 
 get_files_dataset(drive, folderid)
 filepath = "aw-buckets-export.json"
 
 def cpc_loss_fn(inputs: ArrayNest):
-  return CPC.Model()(inputs, is_training=True)
+  return cpc.CPC.Model()(inputs, is_training=True)
 
 cpc_model = hk.transform(cpc_loss_fn)
 train_iter = iter(np_train)

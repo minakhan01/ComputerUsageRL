@@ -1,14 +1,12 @@
 from typing import Dict
+import jax.numpy as jnp
+import haiku as hk
 
 ArrayNest = Dict[str, jnp.ndarray]
 
 class CPC:
   class Encoder(hk.Module):
     """Takes a dict of 3d arrays indexed by batch_size, time, num_events."""
-
-    # def __init__(self,
-    #             name: Optional[str] = None):
-    #   super().__init__(name=name)
 
     def __call__(self, inputs: ArrayNest, is_training: bool) -> jnp.ndarray:
       """{'duration': (TensorShape([16, 64, 64]), tf.int64), 
@@ -41,9 +39,7 @@ class CPC:
       mask = jnp.greater(inputs["event_type"], 0)
       event_mask = jnp.reshape(mask, [batch_size * seq_len, num_events])
       event_mask = jnp.logical_and(event_mask[:, None, :, None], event_mask[:, None, None, :])
-      # print("mask shape before any", mask.shape)
       time_mask = mask.any(axis=2)
-      # print("mask shape after any", time_mask.shape)
       time_mask = jnp.logical_and(time_mask[:, None, :, None], time_mask[:, None, None, :])
       transformer = Transformer(num_heads=4, 
                                 num_layers=6,
@@ -63,9 +59,7 @@ class CPC:
                  ) -> jnp.ndarray:
       """z_t: [bs, t, dim]"""
       transformer = Transformer(num_heads=4, num_layers=6, causal=True, dropout_rate=0.1)
-      # print("Before CausalTemporalEncoder mask shape", mask.shape)
       c_t = transformer(z_t, mask, is_training=is_training)
-      # print("After CausalTemporalEncoder mask shape", mask.shape)
       return c_t
 
   class Model(hk.Module):
